@@ -1,0 +1,243 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewpoint" content="width=device-width, initial-scale=1.0">
+    <title>cargame</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        .hide {
+            display: none;
+        }
+        body{
+            background-image: url("https://i.ibb.co/PNRLVr8/DSC-0775.jpg");
+        }
+        .car{
+            background-image: url("https://i.ibb.co/h9pBQNQ/download772.png");
+            background-repeat: no-repeat;
+            background-size: cover;
+            position: absolute;
+            bottom: 100px;
+            margin: auto;
+            width: 70px;
+            height: 160px;
+            line-height: 38px;
+            vertical-align: middle;
+        }
+        .police{
+            background-image: url("https://i.ibb.co/F8LP2bP/cop.png");
+            background-repeat: no-repeat;
+            background-size: cover;
+            position: absolute;
+            bottom: 100px;
+            margin: auto;
+            width: 70px;
+            height: 160px;
+            line-height: 38px;
+            font-size: 1.7em;
+            text-align: center;
+            vertical-align: middle;
+            
+        }
+        .line {
+            position: absolute;
+            height: 100px;
+            width: 10px;
+            margin-left: 195px;
+            background-color:green;
+        }  
+        .scoreboard {
+            justify-content: center;
+            position: relative;
+font-family: 'Press Start 2P', cursive;
+            
+            left: 1%;
+            right: 50%;
+            border: 10px;
+            height: 90px;
+            text-align: center;
+            color: white;
+            font-size: 1.3em; 
+            background-image: url("https://i.ibb.co/PNRLVr8/DSC-0775.jpg");          
+        }
+        .thegame {
+            background-color: black;
+            width: 400px;
+            height: 100%;
+            overflow: hidden;
+            margin: auto;
+            position: relative;
+        }
+        .thestart {
+            font-family: 'Orbitron', sans-serif;
+            margin-top: 20%;
+            position: absolute;
+            background-color: black;
+            left: 15%;
+            right: 15%;
+            height: 15%;
+            color: white;
+            z-index: 1;
+            text-align: center;
+            border: 1px lightseagreen;
+            padding: 15px;
+            margin: auto;
+            width: 50%;
+            background-image: url("https://i.ibb.co/PNRLVr8/DSC-0775.jpg");
+            
+        }
+        button{
+            background-color: black;
+            color: green;
+            font-family: 'Orbitron', sans-serif;
+        }
+               
+    </style>
+
+</head>
+   <body>
+    <div class="scoreboard"></div>
+    <div class="game">
+    <div class="thestart">Press 'drive' to start
+            <br><p>Level [EASY]</p>
+            <br><p>Avoid masanse</p>
+            <button>Drive</button>
+            
+    </div>
+    <div class="thegame"></div>
+    </div>
+    <script>
+        const scoreboard = document.querySelector(".scoreboard");
+        const thestart= document.querySelector(".thestart");
+        const thegame = document.querySelector(".thegame");
+        let player = {
+            speed: 15
+            , score: 0
+        };
+        let keys = {
+            ArrowUp: false
+            , ArrowDown: false
+            , ArrowRight: false
+            , ArrowLeft: false
+        };
+        thestart.addEventListener("click", start);
+        document.addEventListener("keydown", pressOn);
+        document.addEventListener("keyup", pressOff);
+
+        function moveLines() {
+            let lines = document.querySelectorAll(".line");
+            lines.forEach(function (item) {
+                if (item.y >= 1500) {
+                    item.y -= 1500;
+                }
+                item.y += player.speed;
+                item.style.top = item.y + "px";
+            })
+        }
+        function isCollide(a, b) {
+            let aRect = a.getBoundingClientRect();
+            let bRect = b.getBoundingClientRect();
+            return !(
+                (aRect.bottom < bRect.top) || (aRect.top > bRect.bottom) || (aRect.right < bRect.left) || (aRect.left > bRect.right))
+        }
+
+        function movepolice(car) {
+            let ele = document.querySelectorAll(".police");
+            ele.forEach(function (item) {
+                if (isCollide(car, item)) {
+                    console.log("HIT");
+                    endGame();
+                }
+                if (item.y >= 1500) {
+                    item.y = -600;
+                    item.style.left = Math.floor(Math.random() * 350) + "px";
+                }
+                item.y += player.speed;
+                item.style.top = item.y + "px";
+            })
+        }
+        
+        function playGame() {
+            let car = document.querySelector(".car");
+            moveLines();
+            movepolice(car);
+            let road = thegame.getBoundingClientRect();
+            if (player.start) {
+                if (keys.ArrowUp && player.y > road.top) {
+                    player.y -= player.speed;
+                }
+                if (keys.ArrowDown && player.y < road.bottom) {
+                    player.y += player.speed;
+                }
+                if (keys.ArrowLeft && player.x > 0) {
+                    player.x -= player.speed;
+                }
+                if (keys.ArrowRight && player.x < (road.width - 70)) {
+                    player.x += player.speed;
+                }
+                car.style.left = player.x + 'px';
+                car.style.top = player.y + 'px';
+                window.requestAnimationFrame(playGame);
+                player.scoreboard++;
+                scoreboard.innerText = "Scoreboard: " + player.scoreboard;
+            }
+        }
+
+        function pressOn(e) {
+            e.preventDefault();
+            keys[e.key] = true;
+        }
+
+        function pressOff(e) {
+            e.preventDefault();
+            keys[e.key] = false;
+        }
+
+        function endGame() {
+            player.start = false;
+            scoreboard.innerHTML = "Game Over<br>Try Again<br>Your score is " + player.scoreboard;
+            thestart.classList.remove("hide");
+        }
+
+        function start() {
+            thestart.classList.add("hide");
+            thegame.innerHTML = "";
+            player.start = true;
+            player.scoreboard = 0;
+            for (let x = 0; x < 10; x++) {
+                let div = document.createElement("div");
+                div.classList.add("line");
+                div.y = x * 150;
+                div.style.top = (x * 150) + "px";
+                thegame.appendChild(div);
+            }
+            window.requestAnimationFrame(playGame);
+            let car = document.createElement("div");
+            car.setAttribute("class", "car");
+            thegame.appendChild(car);
+            player.x = car.offsetLeft;
+            player.y = car.offsetTop;
+            for (let x = 0; x < 3; x++) {
+                let police = document.createElement("div");
+                police.classList.add("police");
+                police.innerHTML = "<br>" + (x + 1);
+                police.y = ((x + 1) * 600) * -1;
+                police.style.top = police.y + "px";
+                police.style.left = Math.floor(Math.random() * 350) + "px";
+                police.style.backgroundColor = randomColor();
+                thegame.appendChild(police);
+            }
+        }
+        function randomColor() {
+            function c() {
+                let hex = Math.floor(Math.random() * 256).toString(16);
+                return ("0" + String(hex)).substr(-2)
+            }
+            return "#" + c() + c() + c();
+        }
+    </script>
+</body>
+</html>
+    
+        
